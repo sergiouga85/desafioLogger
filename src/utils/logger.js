@@ -1,38 +1,57 @@
-import { NODE_ENV } from '../config/config.js'
+import { NODE_ENV } from '../config/config.js';
+import winston from 'winston';
+const { createLogger, format, transports } = winston;
 
-import winston from 'winston'
+// Define niveles de log
+const levels = {
+  debug: 0,
+  http: 1,
+  info: 2,
+  warning: 3,
+  error: 4,
+  fatal: 5,
+};
 
-// const levels = {
-//     fatal: 0,
-//     error: 1,
-//     warning: 2,
-//     info: 3,
-//     debug: 4,
-// }
+// Configuración del formato de log
+const logFormat = format.combine(
+  format.timestamp(),
+  format.errors({ stack: true }),
+  format.printf(({ level, message, timestamp, stack }) => {
+    return `${timestamp} [${level.toUpperCase()}]: ${message} ${stack || ''}`;
+  })
+);
 
-const winstonLoggerDev = winston.createLogger({
-  // levels,
+// Configuración del logger para desarrollo
+const developmentLogger = createLogger({
+  levels,
+  format: logFormat,
+  transports: [new transports.Console()],
+});
+
+// Configuración del logger para producción
+const productionLogger = createLogger({
+  levels,
+  format: logFormat,
   transports: [
-    new winston.transports.Console({
-      level: "debug",
-    })
-  ]
-})
+    new transports.Console({
+      level: 'info',
+    }),
+    new transports.File({
+      filename: 'errors.log',
+      level: 'error',
+    }),
+  ],
+});
 
-const winstonLoggerProd = winston.createLogger({
-  // levels,
-  transports: [
-    new winston.transports.File({
-      level: "info",
-      filename: 'errors.log'
-    })
-  ]
-})
-
-export let logger 
-
-  if (NODE_ENV === 'production') {
-    logger = winstonLoggerProd
+// Función para obtener el logger según el entorno
+function getLogger() {
+  if (process.env.NODE_ENV === 'production') {
+    return productionLogger;
   } else {
-    logger = winstonLoggerDev
+    return developmentLogger;
   }
+}
+
+export const logger = getLogger();
+
+

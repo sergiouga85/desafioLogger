@@ -1,7 +1,7 @@
 import { usersDao } from '../dao/index.js';
 import { appendJwtAsCookie } from './authentication.business.js';
-import {logger} from '../utils/logger.js'
-import {UserDTO} from '../dto/userDto.js';
+import { logger} from '../utils/logger.js'; // Ajusta la ruta correctamente
+import { UserDTO } from '../dto/userDto.js';
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -10,10 +10,10 @@ export const registerUser = async (req, res, next) => {
     res['successfullPost'](req.user);
 
     // Loggear información
-    logger.info('Usuario registrado correctamente:', req.user.username);
+    req.logger.info('Usuario registrado correctamente:'+ req.user);
   } catch (error) {
     // Loggear errores
-    logger.error('Error al registrar usuario:', error.message);
+    req.logger.error('Error al registrar usuario:'+ error.message);
     next(error);
   }
 }
@@ -25,10 +25,11 @@ export const getCurrentUser = async (req, res, next) => {
     res['successfullGet'](userDTO);
 
     // Loggear información
-    logger.info('Obteniendo información del usuario:', req.user);
+    
+    req.logger.info("Obteniendo información del usuario:" + userDTO.email);
   } catch (error) {
     // Loggear errores
-    logger.error('Error al obtener información del usuario:', error.message);
+    req.logger.error('Error al obtener información del usuario:'+ error.message);
     next(error);
   }
 }
@@ -41,10 +42,10 @@ export const getAllUsers = async (req, res, next) => {
     res['successfullGet'](usuarios);
 
     // Loggear información
-    logger.info('Obteniendo lista de usuarios');
+    req.logger.info('Obteniendo lista de usuarios');
   } catch (error) {
     // Loggear errores
-    logger.error('Error al obtener lista de usuarios:', error.message);
+    req.logger.error('Error al obtener lista de usuarios:'+ error.message);
     next(error);
   }
 };
